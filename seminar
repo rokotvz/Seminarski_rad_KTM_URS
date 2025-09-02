@@ -1,0 +1,80 @@
+void PosKvadrant(int kvadrant) 
+{ 
+HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_SET); 
+HAL_GPIO_WritePin(GPIOB, GPIO_PIN_1, GPIO_PIN_SET); 
+HAL_GPIO_WritePin(GPIOB, GPIO_PIN_2, GPIO_PIN_SET); 
+HAL_GPIO_WritePin(GPIOB, GPIO_PIN_4, GPIO_PIN_SET); 
+switch (kvadrant) { 
+case 0: HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_RESET); break; 
+case 1: HAL_GPIO_WritePin(GPIOB, GPIO_PIN_1, GPIO_PIN_RESET); break; 
+case 2: HAL_GPIO_WritePin(GPIOB, GPIO_PIN_2, GPIO_PIN_RESET); break; 
+case 3: HAL_GPIO_WritePin(GPIOB, GPIO_PIN_4, GPIO_PIN_RESET); break; 
+} 
+} 
+uint16_t ledPins[10] = { 
+GPIO_PIN_0, GPIO_PIN_1, GPIO_PIN_4, GPIO_PIN_6, GPIO_PIN_7, 
+GPIO_PIN_8, GPIO_PIN_9, GPIO_PIN_10, GPIO_PIN_11, GPIO_PIN_12}
+void PaliLed(int ledIndex, int trenKvadrant) 
+{ 
+// Ugasi sve LED-ice 
+for (int i = 0; i < 10; i++) { 
+HAL_GPIO_WritePin(GPIOA, ledPins[i], GPIO_PIN_RESET); 
+} 
+11   // Ako je LED na PA0 (ledIndex == 0) pali je samo kad je kvartal 0 
+12   if (ledIndex == 0 && trenKvadrant != 0) { 
+13       
+return; // preskoči paljenje 
+14   } 
+15  
+16   // Inače upali traženu LED 
+17   HAL_GPIO_WritePin(GPIOA, ledPins[ledIndex], GPIO_PIN_SET); 
+} 18  
+vo19 id Click() 
+{ 20  
+21 HAL_GPIO_WritePin(GPIOC, GPIO_PIN_0, GPIO_PIN_SET); 
+22 HAL_Delay(1); 
+23 HAL_GPIO_WritePin(GPIOC, GPIO_PIN_0, GPIO_PIN_RESET);
+ 
+int trenLed = rand() % 10; 
+  67 int trenKvartal = rand() % 4; 
+  70 PosKvadrant(trenKvartal); 
+  71 if (!(trenLed == 0 && trenKvartal != 0)) { 
+  72     PaliLed(trenLed,trenKvartal); 
+  73 }
+while (1) 
+  81 { 
+  82  
+83    if (HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_1) == GPIO_PIN_RESET) 
+84    { 
+85      uint32_t startTime = HAL_GetTick(); 
+86      while (HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_1) == GPIO_PIN_RESET); 
+87      uint32_t pressDuration = HAL_GetTick() - startTime; 
+int steps = 37 + rand() % 18; 
+90      if (pressDuration > 500) steps *= 2; 
+91      if (pressDuration > 5000) steps *= 2.01;
+for (int step = 0; step < steps; step++) { 
+94        // 1. Ugasi sve LED-ice 
+95        for (int i = 0; i < 10; i++) { 
+96          HAL_GPIO_WritePin(GPIOA, ledPins[i], GPIO_PIN_RESET); 
+97        } 
+  98  
+99        // 2. Ugasi sve kvartale 
+100       HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | 
+GPIO_PIN_4, GPIO_PIN_SET); 
+102       // 3. Mali delay za stabilizaciju signala 
+103       HAL_Delay(1); 
+105       // 4. Postavi aktivni kvartal 
+106       PosKvadrant(trenKvartal); 
+110       // 5. Upali SAMO aktivnu LED-icu 
+111       if (!(trenLed == 0 && trenKvartal != 0)) { 
+112       HAL_GPIO_WritePin(GPIOA, ledPins[trenLed], GPIO_PIN_SET); 
+  113 
+114       }else ({ trenLed++; 
+115       HAL_GPIO_WritePin(GPIOA, ledPins[trenLed], GPIO_PIN_SET); 
+116       } 
+118       Click();
+trenLed++; 
+125         if (trenLed > 9) { 
+126           trenLed = 0; 
+127           trenKvartal = (trenKvartal + 1) % 4; 
+128         }
