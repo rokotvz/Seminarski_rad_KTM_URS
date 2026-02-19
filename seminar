@@ -65,6 +65,8 @@ int trenLed = rand() % 10;
     };
 while (1) 
   81 { 
+if (pritisnutaTipka)
+	  {
   82  pritisnutaTipka=0;
 		  HAL_TIM_Base_Stop(&htim7);
 _HAL_TIM_SET_COUNTER(&htim7, 0);      
