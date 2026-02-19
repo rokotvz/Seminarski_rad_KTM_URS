@@ -1,3 +1,10 @@
+void Click()
+{
+    HAL_TIM_PWM_Start(&htim8, TIM_CHANNEL_1);
+    __HAL_TIM_SET_COMPARE(&htim8, TIM_CHANNEL_1, htim8.Init.Period / 2);
+    for(volatile int i=0; i<5000; i++);  // <1ms – dovoljno za click
+    HAL_TIM_PWM_Stop(&htim8, TIM_CHANNEL_1);
+}
 void PosKvadrant(int kvadrant) 
 { 
 HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_SET); 
@@ -16,24 +23,33 @@ GPIO_PIN_0, GPIO_PIN_1, GPIO_PIN_4, GPIO_PIN_6, GPIO_PIN_7,
 GPIO_PIN_8, GPIO_PIN_9, GPIO_PIN_10, GPIO_PIN_11, GPIO_PIN_12}
 void PaliLed(int ledIndex, int trenKvadrant) 
 { 
-// Ugasi sve LED-ice 
-for (int i = 0; i < 10; i++) { 
-HAL_GPIO_WritePin(GPIOA, ledPins[i], GPIO_PIN_RESET); 
-} 
-11   // Ako je LED na PA0 (ledIndex == 0) pali je samo kad je kvartal 0 
-12   if (ledIndex == 0 && trenKvadrant != 0) { 
-13       
-return; // preskoči paljenje 
-14   } 
-15  
-16   // Inače upali traženu LED 
-17   HAL_GPIO_WritePin(GPIOA, ledPins[ledIndex], GPIO_PIN_SET); 
-} 18  
-vo19 id Click() 
-{ 20  
-21 HAL_GPIO_WritePin(GPIOC, GPIO_PIN_0, GPIO_PIN_SET); 
-22 HAL_Delay(1); 
-23 HAL_GPIO_WritePin(GPIOC, GPIO_PIN_0, GPIO_PIN_RESET);
+void PaliLed(int ledIndex, int trenKvadrant)
+{
+    // Ugasi sve LED-ice
+    for (int i = 0; i < 10; i++) {
+        HAL_GPIO_WritePin(GPIOA, ledPins[i], GPIO_PIN_RESET);
+    }
+    if (ledIndex == 0 && trenKvadrant != 0) {
+        return; // preskoči paljenje
+    }
+    HAL_GPIO_WritePin(GPIOA, ledPins[ledIndex], GPIO_PIN_SET);
+}
+har* Rulet_GetColor(uint8_t broj)
+{
+    if (broj == 0) return "ZELENA";
+
+    switch(broj)
+    {
+        case 1: case 3: case 5: case 7: case 9:
+        case 12: case 14: case 16: case 18: case 19:
+        case 21: case 23: case 25: case 27: case 30:
+        case 32: case 34: case 36:
+            return "CRVENA";
+
+        default:
+            return "CRNA";
+    }
+}
  
 int trenLed = rand() % 10; 
   67 int trenKvartal = rand() % 4; 
@@ -41,40 +57,90 @@ int trenLed = rand() % 10;
   71 if (!(trenLed == 0 && trenKvartal != 0)) { 
   72     PaliLed(trenLed,trenKvartal); 
   73 }
+ int rouletteNumbers[4][10] = {
+        { 26, 0, 32, 15, 19, 4, 21, 2, 25, 17 },    // Kvadrant 0
+        { -1, 34, 6, 27, 13, 36, 11, 30, 8, 23 },   // Kvadrant 1
+        { -1, 10, 5, 24, 16, 33, 1, 20, 14,  31 },   // Kvadrant 2
+        { -1, 9, 22, 18, 29, 7, 28, 12, 25, 3 }    // Kvadrant 3
+    };
 while (1) 
   81 { 
-  82  
-83    if (HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_1) == GPIO_PIN_RESET) 
-84    { 
-85      uint32_t startTime = HAL_GetTick(); 
-86      while (HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_1) == GPIO_PIN_RESET); 
-87      uint32_t pressDuration = HAL_GetTick() - startTime; 
-int steps = 37 + rand() % 18; 
-90      if (pressDuration > 500) steps *= 2; 
-91      if (pressDuration > 5000) steps *= 2.01;
-for (int step = 0; step < steps; step++) { 
-94        // 1. Ugasi sve LED-ice 
-95        for (int i = 0; i < 10; i++) { 
-96          HAL_GPIO_WritePin(GPIOA, ledPins[i], GPIO_PIN_RESET); 
-97        } 
-  98  
-99        // 2. Ugasi sve kvartale 
-100       HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | 
-GPIO_PIN_4, GPIO_PIN_SET); 
-102       // 3. Mali delay za stabilizaciju signala 
-103       HAL_Delay(1); 
-105       // 4. Postavi aktivni kvartal 
-106       PosKvadrant(trenKvartal); 
-110       // 5. Upali SAMO aktivnu LED-icu 
-111       if (!(trenLed == 0 && trenKvartal != 0)) { 
-112       HAL_GPIO_WritePin(GPIOA, ledPins[trenLed], GPIO_PIN_SET); 
-  113 
-114       }else ({ trenLed++; 
-115       HAL_GPIO_WritePin(GPIOA, ledPins[trenLed], GPIO_PIN_SET); 
-116       } 
-118       Click();
-trenLed++; 
-125         if (trenLed > 9) { 
-126           trenLed = 0; 
-127           trenKvartal = (trenKvartal + 1) % 4; 
-128         }
+  82  pritisnutaTipka=0;
+		  HAL_TIM_Base_Stop(&htim7);
+_HAL_TIM_SET_COUNTER(&htim7, 0);      
+		  HAL_TIM_Base_Start(&htim7);        
+
+		  while (HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_1) == GPIO_PIN_RESET);
+
+		  HAL_TIM_Base_Stop(&htim7);            
+		  uint32_t duzPritiska = __HAL_TIM_GET_COUNTER(&htim7);  
+
+   int steps = 37 + rand() % 18;
+	    if (duzPritiska > 500) steps *= 2;
+	    if (duzPritiska > 5000) steps *= 2.01;
+
+	    for (int step = 0; step < steps; step++) {
+	      // 1. Ugasi sve LED-ice
+	      for (int i = 0; i < 10; i++) {
+	        HAL_GPIO_WritePin(GPIOA, ledPins[i], GPIO_PIN_RESET);
+	      }
+
+	      // 2. Ugasi sve kvartale
+	      HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_4, GPIO_PIN_SET);
+
+	      // 3. Mali delay za stabilizaciju signala
+	      HAL_Delay(1);
+
+	      // 4. Postavi aktivni kvartal
+	      PosKvadrant(trenKvartal);
+
+
+
+	      // 5. Upali SAMO aktivnu LED-icu
+	      if (!(trenLed == 0 && trenKvartal != 0)) {
+
+	          HAL_GPIO_WritePin(GPIOA, ledPins[trenLed], GPIO_PIN_SET);
+
+	      }
+	      else if (1) {
+
+	          trenLed++;
+
+	          if (trenLed > 9) {
+	              trenLed = 0;
+	              trenKvartal = (trenKvartal + 1) % 4;
+	          }
+
+	          HAL_GPIO_WritePin(GPIOA, ledPins[trenLed], GPIO_PIN_SET);
+	      }
+
+	    int finalLed = trenLed;
+
+	    while (rouletteNumbers[trenKvartal][finalLed] == -1) {
+
+	        finalLed++;
+
+	        if (finalLed > 9) {
+	            finalLed = 0;
+	            trenKvartal = (trenKvartal + 1) % 4;
+	        }
+	    }
+
+	    int resultNumber = rouletteNumbers[trenKvartal][finalLed];
+     uint8_t rezultat = resultNumber;
+
+	    LCD_Clear();
+
+	    LCD_SetCursor(0, 0);          
+	    LCD_SendString("Broj: ");
+
+	    char buffer[10];               
+	    sprintf(buffer, " %2d", resultNumber);
+
+	    LCD_SendString(buffer);
+
+
+	    LCD_SetCursor(1, 0);          // red 1, kolona 0
+	    LCD_SendString(Rulet_GetColor(resultNumber));
+	    sprintf(buffer, " %d", Rulet_GetColor(resultNumber));
+
