@@ -104,7 +104,7 @@ _HAL_TIM_SET_COUNTER(&htim7, 0);
 	          HAL_GPIO_WritePin(GPIOA, ledPins[trenLed], GPIO_PIN_SET);
 
 	      }
-	      else if (1) {
+	      else  {
 
 	          trenLed++;
 
