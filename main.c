@@ -256,15 +256,6 @@ int main(void)
         { -1, 9, 22, 18, 29, 7, 28, 12, 25, 3 }    // Kvadrant 3
     };
 
-
-  //LightLed(currentLed, currentQuarter);
-  //Click();
-  /*
-  HAL_TIM_PWM_Start(&htim8, TIM_CHANNEL_1);
-  __HAL_TIM_SET_COMPARE(&htim8, TIM_CHANNEL_1, htim8.Init.Period / 2);
-  HAL_Delay(200);
-  __HAL_TIM_SET_COMPARE(&htim8, TIM_CHANNEL_1, 0);
-*/
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -290,14 +281,7 @@ int main(void)
 		  uint32_t duzPritiska = __HAL_TIM_GET_COUNTER(&htim7);  // očitaj vrijeme
 
 
-		  /*
 
-		  LCD_SetCursor(0, 0);
-		 char buf[16];
-		  sprintf(buf, "Vrijeme: %4d ms", duzPritiska);
-		  LCD_Clear();
-		  LCD_SendString(buf);
-*///>=
 	    int steps = 37 + rand() % 18;
 	    if (duzPritiska > 5000) steps *= 1.5;
 	    //if (duzPritiska > 5000) steps *= 2.1;
@@ -366,20 +350,17 @@ int main(void)
 
 	    LCD_Clear();
 
-	    LCD_SetCursor(0, 0);          // red 0, kolona 0
+	    LCD_SetCursor(0, 0);         
 	    LCD_SendString("Broj: ");
 
-	    char buffer[10];               // dovoljno za 0–36 + null
+	    char buffer[10];               
 	    sprintf(buffer, " %2d", resultNumber);
 
 	    LCD_SendString(buffer);
 
-	    // 3. Drugi red — boja
-	    LCD_SetCursor(1, 0);          // red 1, kolona 0
+	    LCD_SetCursor(1, 0);         
 	    LCD_SendString(Rulet_GetColor(resultNumber));
 	    sprintf(buffer, " %d", Rulet_GetColor(resultNumber));
-	    //LCD_SendString("||");
-	    //sprintf(buffer, " K %2d L %2d", trenKvartal, finalLed);
 	  }
 
 
